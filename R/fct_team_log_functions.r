@@ -32,7 +32,36 @@ transform_team_log_fd <- function(file_path) {
     }
     team_log_table_clean <- head(team_log_table_clean, -1)
 
+    team_log_table_clean <- re_class_cols(team_log_table_clean)
+
+    team_log_table_clean <- team_log_table_clean %>%
+        # janitor::tabyl() %>%
+        janitor::adorn_totals("row")
+
     return(team_log_table_clean)
 }
 
+re_class_cols <- function(table_in) {
+    table_out <- table_in %>%
+        dplyr::rename(
+            GP = "GP*",
+            plus_minus = "+/-"
+        ) %>%
+        dplyr::mutate(
+            GP = as.numeric(GP),
+            G = as.numeric(G),
+            A = as.numeric(A),
+            plus_minus = as.numeric(plus_minus),
+            PIM = as.numeric(PIM),
+            PPP = as.numeric(PPP),
+            GWG = as.numeric(GWG),
+            HIT = as.numeric(HIT),
+            BLK = as.numeric(BLK)
+        )
+
+    return(table_out)
+}
+
 file_path <- "data/team_logs/fuck_yeah_tom_wilson_fd_log_2018.csv"
+
+clean_team_log <- transform_team_log_fd(file_path)
