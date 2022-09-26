@@ -103,3 +103,18 @@ run_clean_table <- function(file_path,
 
     return(clean_team_log)
 }
+
+bind_all_tables <- function(table_list_in) {
+    full_table <- dplyr::bind_rows(
+        table_list_in
+    )
+
+    return(full_table)
+}
+
+write_to_csv <- function(table, file_path) {
+    readr::write_csv(
+        table,
+        file = file_path
+    )
+}
