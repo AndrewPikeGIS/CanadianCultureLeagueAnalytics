@@ -82,3 +82,24 @@ add_year_and_name <- function(tib_in,
 
     return(table_out)
 }
+
+return_team_list <- function(file_path) {
+    file_list <- list.files(
+        file_path,
+        pattern = "*.csv"
+    )
+    return(file_list)
+}
+
+run_clean_table <- function(file_path,
+                            file_name) {
+    file_full_path <- paste0(
+        file_path,
+        "/",
+        file_name
+    )
+    clean_team_log <- transform_team_log_fd(file_full_path) %>%
+        add_year_and_name(table_in = file_full_path)
+
+    return(clean_team_log)
+}
