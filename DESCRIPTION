@@ -14,6 +14,7 @@ Imports:
     dplyr,
     janitor,
     magrittr,
+    pkgload,
     readr,
     stringr,
     tibble,
