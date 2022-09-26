@@ -62,6 +62,24 @@ re_class_cols <- function(table_in) {
     return(table_out)
 }
 
+add_year_and_name <- function(table_in) {
+    table_name <- basename(table_in)
+    team_list <- stringr::str_split(
+        table_name,
+        "_fd_log_"
+    )
+    team_name <- team_list[[1]]
+    team_year <- team_list[[2]]
+
+    table_out <- table_in %>%
+        dplyr::mutate(
+            year = team_year,
+            team_name = team_name
+        )
+
+    return(table_out)
+}
+
 file_path <- "data/team_logs/fuck_yeah_tom_wilson_fd_log_2018.csv"
 
 clean_team_log <- transform_team_log_fd(file_path)

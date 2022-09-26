@@ -15,6 +15,7 @@ Imports:
     janitor,
     magrittr,
     readr,
+    stringr,
     tibble,
     tidyr,
     tidyselect
