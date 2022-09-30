@@ -1,8 +1,9 @@
-transform_team_log_fd <- function(file_path) {
-    team_log_table <- readr::read_csv(file_path, col_names = F)
-    # testing
-    team_log_table <- tidyr::drop_na(team_log_table)
+read_in_table <- function(table_path) {
+    team_log_table <- readr::read_csv(table_path, col_names = F)
+    return(team_log_table)
+}
 
+transform_team_log_fd <- function(team_log_table) {
     for (i in seq_len(nrow(team_log_table))) {
         if (i == 1) {
             team_log_header <- team_log_table[1:10, ]
@@ -17,8 +18,8 @@ transform_team_log_fd <- function(file_path) {
             names(team_log_header_t) <- name_vector
 
             team_log_table_clean <- team_log_header_t[-1, ]
-        } else if (i %% 11 == 0) {
-            table_selection <- team_log_table[i:(i + 9), ]
+        } else if (i %% 10 == 0) {
+            table_selection <- team_log_table[(i + 1):(i + 10), ]
             table_selection_t <- t(table_selection) %>%
                 tibble::as_tibble(
                     .name_repair = "unique"
@@ -31,6 +32,8 @@ transform_team_log_fd <- function(file_path) {
             )
         }
     }
+
+    team_log_table_clean <- tidyr::drop_na(team_log_table_clean)
 
     team_log_table_clean <- head(team_log_table_clean, -1)
 
@@ -49,16 +52,9 @@ re_class_cols <- function(table_in) {
             GP = "GP*",
             plus_minus = "+/-"
         ) %>%
-        dplyr::mutate(
-            GP = as.numeric(GP),
-            G = as.numeric(G),
-            A = as.numeric(A),
-            plus_minus = as.numeric(plus_minus),
-            PIM = as.numeric(PIM),
-            PPP = as.numeric(PPP),
-            GWG = as.numeric(GWG),
-            HIT = as.numeric(HIT),
-            BLK = as.numeric(BLK)
+        dplyr::mutate_at(
+            dplyr::vars(-Name),
+            as.numeric
         )
 
     return(table_out)
@@ -100,7 +96,11 @@ run_clean_table <- function(file_path,
         "/",
         file_name
     )
-    clean_team_log <- transform_team_log_fd(file_full_path) %>%
+    raw_table <- read_in_table(file_full_path)
+
+    pre_processed_table <- team_log_pre_process(raw_table)
+
+    clean_team_log <- transform_team_log_fd(pre_processed_table) %>%
         add_year_and_name(table_in = file_full_path)
 
     return(clean_team_log)
