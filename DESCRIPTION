@@ -15,6 +15,7 @@ Imports:
     janitor,
     magrittr,
     pkgload,
+    plotly,
     readr,
     stringr,
     tibble,
