@@ -1,6 +1,7 @@
 transform_team_log_fd <- function(file_path) {
     team_log_table <- readr::read_csv(file_path, col_names = F)
     # testing
+    team_log_table <- tidyr::drop_na(team_log_table)
 
     for (i in seq_len(nrow(team_log_table))) {
         if (i == 1) {
@@ -16,8 +17,8 @@ transform_team_log_fd <- function(file_path) {
             names(team_log_header_t) <- name_vector
 
             team_log_table_clean <- team_log_header_t[-1, ]
-        } else if (i %% 12 == 0) {
-            table_selection <- team_log_table[(i + 1):(i + 10), ]
+        } else if (i %% 11 == 0) {
+            table_selection <- team_log_table[i:(i + 9), ]
             table_selection_t <- t(table_selection) %>%
                 tibble::as_tibble(
                     .name_repair = "unique"
@@ -30,6 +31,7 @@ transform_team_log_fd <- function(file_path) {
             )
         }
     }
+
     team_log_table_clean <- head(team_log_table_clean, -1)
 
     team_log_table_clean <- re_class_cols(team_log_table_clean)
@@ -117,4 +119,13 @@ write_to_csv <- function(table, file_path) {
         table,
         file = file_path
     )
+}
+
+team_log_pre_process <- function(team_log_table) {
+    table_out <- team_log_table %>%
+        dplyr::mutate(
+            X1 = dplyr::na_if(X1, "?"),
+            X1 = dplyr::na_if(X1, "No new player Notes")
+        ) %>%
+        tidyr::drop_na()
 }
