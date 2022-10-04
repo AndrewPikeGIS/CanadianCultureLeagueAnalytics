@@ -13,6 +13,7 @@ full_table <- bind_all_tables(team_logs)
 write_to_csv(full_table, file_out)
 
 
+
 full_table %>%
     dplyr::filter(
         Name == "Total"

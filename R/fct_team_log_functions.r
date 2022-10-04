@@ -129,3 +129,17 @@ team_log_pre_process <- function(team_log_table) {
         ) %>%
         tidyr::drop_na()
 }
+
+join_manager_table <- function(table_in) {
+    manager_table <- readr::read_csv(
+        file = "data/Team_Managers.csv"
+    )
+
+    table_out <- dplyr::full_join(
+        table_in,
+        manager_table,
+        by = c("Name = Team")
+    )
+
+    return(table_out)
+}
