@@ -19,17 +19,15 @@ manager_table <- read_manager_table()
 standings_table <- read_standings_table()
 ```
 
-
-
+## Table Joins
 ```{r join_tables}
 team_log_w_manager <- join_manager_table(team_logs, manager_table)
 
-full_table <- join_standings_table(team_log_w_manager, standings_table)
+full_table <- join_standings_table(team_log_w_manager, standings_table) %>%
+    normalize_gp()
 ```
 
 ## Games Played
-
-
 
 ```{r games played plot, echo=FALSE}
 full_table %>%
@@ -40,10 +38,32 @@ full_table %>%
         year
     ) %>%
     plotly::plot_ly(
-        x = ~Manager,
-        y = ~GP,
+        x = ~year,
+        y = ~GP_norm,
         type = "bar",
-        color = ~year,
+        color = ~Manager,
         text = ~team_name
     )
+```
+
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+full_table %>%
+    dplyr::filter(
+        Name == "Total"
+    ) %>%
+    plotly::plot_ly(
+        x = ~final_rank,
+        y = ~GP_norm,
+        type = "scatter",
+        color = ~Manager,
+        text = ~team_name
+    )
+```
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+numeric_table <- dplyr::select_if(full_table, is.numeric)
+cor_numeric <- cor(numeric_table)
+
+corrplot::corrplot(cor_numeric, method = "number")
 ```

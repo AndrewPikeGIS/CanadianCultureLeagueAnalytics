@@ -160,7 +160,11 @@ read_manager_table <- function() {
 read_standings_table <- function() {
     standings_table <- readr::read_csv(
         "data/standings.csv"
-    )
+    ) %>%
+        dplyr::rename(
+            final_rank = "Final Rank",
+            pre_playoff_rank = "pre playoff rank"
+        )
 
     return(standings_table)
 }
@@ -169,6 +173,19 @@ join_standings_table <- function(table_in, standings_table) {
     full_table <- dplyr::full_join(
         table_in,
         standings_table,
-        by = c("team_name" = "Team")
+        by = c(
+            "team_name" = "Team",
+            "year" = "year"
+        )
     )
+}
+
+normalize_gp <- function(table_in) {
+    table_out <- table_in %>%
+        dplyr::group_by(
+            year
+        ) %>%
+        dplyr::mutate(
+            GP_norm = GP / max(GP)
+        )
 }
