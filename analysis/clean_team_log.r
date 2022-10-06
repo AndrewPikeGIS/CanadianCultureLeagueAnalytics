@@ -12,15 +12,20 @@ full_table <- bind_all_tables(team_logs)
 
 write_to_csv(full_table, file_out)
 
+full_table_w_name <- join_manager_table(full_table)
 
-
-full_table %>%
+full_table_w_name %>%
     dplyr::filter(
         Name == "Total"
     ) %>%
+    dplyr::group_by(
+        Manager,
+        year
+    ) %>%
     plotly::plot_ly(
-        x = ~team_name,
+        x = ~Manager,
         y = ~GP,
         type = "bar",
-        color = ~year
+        color = ~year,
+        text = ~team_name
     )

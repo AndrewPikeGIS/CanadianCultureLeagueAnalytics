@@ -4,23 +4,46 @@ author: "Andrew Pike"
 date: "25/09/2022"
 output: html_document
 ---
+```{r load_package, echo = FALSE, warning = FALSE, message = FALSE}
+pkgload::load_all()
+```
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
+## Load Data 
+
+```{r read_tables, include=FALSE}
+team_logs <- read_team_logs()
+
+manager_table <- read_manager_table()
+
+standings_table <- read_standings_table()
 ```
 
 
 
-```{r cars}
-summary(cars)
+```{r join_tables}
+team_log_w_manager <- join_manager_table(team_logs, manager_table)
+
+full_table <- join_standings_table(team_log_w_manager, standings_table)
 ```
 
-## Including Plots
+## Games Played
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+```{r games played plot, echo=FALSE}
+full_table %>%
+    dplyr::filter(
+        Name == "Total"
+    ) %>%
+    dplyr::group_by(
+        year
+    ) %>%
+    plotly::plot_ly(
+        x = ~Manager,
+        y = ~GP,
+        type = "bar",
+        color = ~year,
+        text = ~team_name
+    )
 ```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

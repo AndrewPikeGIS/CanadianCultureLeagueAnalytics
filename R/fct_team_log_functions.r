@@ -68,6 +68,7 @@ add_year_and_name <- function(tib_in,
         "_fd_log_"
     )
     team_name <- team_list[[1]][1]
+    team_name <- gsub("_", " ", team_name)
     team_year <- team_list[[1]][2]
 
     team_year <- sub(".csv", "", team_year)
@@ -130,16 +131,44 @@ team_log_pre_process <- function(team_log_table) {
         tidyr::drop_na()
 }
 
-join_manager_table <- function(table_in) {
+join_manager_table <- function(table_in, manager_table) {
+    table_out <- dplyr::full_join(
+        table_in,
+        manager_table,
+        by = c("team_name" = "Team")
+    )
+
+    return(table_out)
+}
+
+read_team_logs <- function() {
+    team_logs <- readr::read_csv(
+        "data/full_team_logs.csv"
+    )
+
+    return(team_logs)
+}
+
+read_manager_table <- function() {
     manager_table <- readr::read_csv(
         file = "data/Team_Managers.csv"
     )
 
-    table_out <- dplyr::full_join(
-        table_in,
-        manager_table,
-        by = c("Name = Team")
+    return(manager_table)
+}
+
+read_standings_table <- function() {
+    standings_table <- readr::read_csv(
+        "data/standings.csv"
     )
 
-    return(table_out)
+    return(standings_table)
+}
+
+join_standings_table <- function(table_in, standings_table) {
+    full_table <- dplyr::full_join(
+        table_in,
+        standings_table,
+        by = c("team_name" = "Team")
+    )
 }
