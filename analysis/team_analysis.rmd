@@ -62,15 +62,19 @@ full_table %>%
 ```
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
-numeric_table <- dplyr::select_if(full_table, is.numeric) %>%
+numeric_table <- full_table %>%
+    dplyr::filter(Name == "Total") %>%
+    dplyr::select_if(is.numeric) %>%
     dplyr::select(
         -c(
             "Waiver",
             "Pts",
-            "Pct"
+            "Pct",
+            "year"
         )
     )
+
 cor_numeric <- cor(numeric_table)
 
-corrplot::corrplot(cor_numeric, method = "number")
+corrplot::corrplot.mixed(cor_numeric, upper = "ellipse", lower = "number", tl.pos = "lt")
 ```
