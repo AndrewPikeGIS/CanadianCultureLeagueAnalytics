@@ -78,3 +78,7 @@ cor_numeric <- cor(numeric_table)
 
 corrplot::corrplot.mixed(cor_numeric, upper = "ellipse", lower = "number", tl.pos = "lt")
 ```
+
+```{r build_regression, echo = FALSE, warning = FALSE, message = FALSE}
+
+```

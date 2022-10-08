@@ -143,7 +143,9 @@ join_manager_table <- function(table_in, manager_table) {
 
 read_team_logs <- function() {
     team_logs <- readr::read_csv(
-        "data/full_team_logs.csv"
+        here::here(
+            "data/full_team_logs.csv"
+        )
     )
 
     return(team_logs)
@@ -151,7 +153,9 @@ read_team_logs <- function() {
 
 read_manager_table <- function() {
     manager_table <- readr::read_csv(
-        file = "data/Team_Managers.csv"
+        here::here(
+            "data/Team_Managers.csv"
+        )
     )
 
     return(manager_table)
@@ -159,7 +163,9 @@ read_manager_table <- function() {
 
 read_standings_table <- function() {
     standings_table <- readr::read_csv(
-        "data/standings.csv"
+        here::here(
+            "data/standings.csv"
+        )
     ) %>%
         dplyr::rename(
             final_rank = "Final Rank",
