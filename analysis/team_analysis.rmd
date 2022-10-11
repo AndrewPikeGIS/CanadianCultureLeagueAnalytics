@@ -80,5 +80,12 @@ corrplot::corrplot.mixed(cor_numeric, upper = "ellipse", lower = "number", tl.po
 ```
 
 ```{r build_regression, echo = FALSE, warning = FALSE, message = FALSE}
+totals_table <- full_table %>%
+    dplyr::filter(
+        Name == "Total"
+    )
 
+skim_table <- skimr::skim(totals_table)
+
+reactable::reactable(skim_table)
 ```
