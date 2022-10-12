@@ -25,15 +25,31 @@ team_log_w_manager <- join_manager_table(team_logs, manager_table)
 
 full_table <- join_standings_table(team_log_w_manager, standings_table) %>%
     normalize_gp()
+
+totals_table <- full_table %>%
+    dplyr::filter(
+        Name == "Total"
+    ) %>%
+    dplyr::mutate(
+        Manager = as.factor(Manager),
+        division = as.factor(division)
+    ) %>%
+    dplyr::select(
+        -c(
+            "W-L-T",
+            "Div",
+            "team_name",
+            "GWG",
+            "SOG",
+            "Name"
+        )
+    )
 ```
 
 ## Games Played
 
 ```{r games played plot, echo=FALSE}
-full_table %>%
-    dplyr::filter(
-        Name == "Total"
-    ) %>%
+totals_table %>%
     dplyr::group_by(
         year
     ) %>%
@@ -42,16 +58,17 @@ full_table %>%
         y = ~GP_norm,
         type = "bar",
         color = ~Manager,
-        text = ~team_name
+        text = ~ paste0(
+            team_name,
+            " : ",
+            final_rank
+        )
     )
 ```
 
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
-full_table %>%
-    dplyr::filter(
-        Name == "Total"
-    ) %>%
+totals_table %>%
     plotly::plot_ly(
         x = ~final_rank,
         y = ~GP_norm,
@@ -62,8 +79,7 @@ full_table %>%
 ```
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
-numeric_table <- full_table %>%
-    dplyr::filter(Name == "Total") %>%
+numeric_table <- totals_table %>%
     dplyr::select_if(is.numeric) %>%
     dplyr::select(
         -c(
@@ -80,12 +96,44 @@ corrplot::corrplot.mixed(cor_numeric, upper = "ellipse", lower = "number", tl.po
 ```
 
 ```{r build_regression, echo = FALSE, warning = FALSE, message = FALSE}
-totals_table <- full_table %>%
-    dplyr::filter(
-        Name == "Total"
-    )
-
-skim_table <- skimr::skim(totals_table)
+skim_table_numeric <- skimr::skim(numeric_table)
 
 reactable::reactable(skim_table)
+```
+
+```{r dummy_col_creation, echo = FALSE, warning = FALSE, message = FALSE}
+dummy_totals <- caret::dummyVars(final_rank ~ ., data = totals_table)
+
+totals_table_w_dummies <- tibble::as_tibble(
+    stats::predict(
+        dummy_totals,
+        newdata = totals_table
+    )
+)
+
+totals_table_w_dummies <- dplyr::bind_cols(
+    final_rank = totals_table$final_rank,
+    totals_table_w_dummies
+)
+```
+
+```{r build_test_train, echo = FALSE, warning = FALSE, message = FALSE}
+set.seed(2)
+
+train_row_numbers <- caret::createDataPartition(
+    totals_table_w_dummies$final_rank,
+    p = 0.75,
+    list = FALSE
+)
+
+training_set <- totals_table_w_dummies[train_row_numbers, ]
+
+test_set <- totals_table_w_dummies[-train_row_numbers, ]
+
+print(str(training_set))
+print(str(test_set))
+```
+
+```{r build_model, echo = FALSE, warning = FALSE, message = FALSE}
+
 ```
