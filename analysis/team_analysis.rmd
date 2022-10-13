@@ -23,7 +23,7 @@ standings_table <- read_standings_table()
 ## Table Joins
 ```{r join_tables}
 team_log_w_manager <- join_manager_table(team_logs, manager_table)
-
+# need to normalize moves
 full_table <- join_standings_table(team_log_w_manager, standings_table) %>%
     normalize_gp()
 
@@ -44,7 +44,12 @@ totals_table <- full_table %>%
             "team_name",
             "GWG",
             "SOG",
-            "Name"
+            "Name",
+            "division",
+            "Pct",
+            "Pts",
+            "Waiver",
+            "pre_playoff_rank"
         )
     )
 ```
@@ -86,12 +91,7 @@ numeric_table <- totals_table %>%
     dplyr::ungroup() %>%
     dplyr::select_if(is.numeric) %>%
     dplyr::select(
-        -c(
-            "Waiver",
-            "Pts",
-            "Pct",
-            "year"
-        )
+        !year
     )
 
 cor_numeric <- cor(numeric_table)
@@ -131,6 +131,10 @@ totals_table_w_dummies <- dplyr::bind_cols(
     final_rank = totals_table$final_rank,
     totals_table_w_dummies
 )
+
+cor_totals <- cor(totals_table_w_dummies)
+
+corrplot::corrplot.mixed(cor_totals, upper = "ellipse", lower = "number", tl.pos = "lt")
 ```
 
 
@@ -167,5 +171,11 @@ reactable::reactable(skim_table_test, pagination = F)
 ## Train Model
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
+set.seed(2)
 
+gbm_fit <- caret::train(
+    final_rank ~ .,
+    data = training_set,
+    method = "gbm"
+)
 ```
