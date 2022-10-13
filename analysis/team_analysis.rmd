@@ -59,7 +59,7 @@ totals_table %>%
         type = "bar",
         color = ~Manager,
         text = ~ paste0(
-            team_name,
+            Manager,
             " : ",
             final_rank
         )
@@ -74,7 +74,7 @@ totals_table %>%
         y = ~GP_norm,
         type = "scatter",
         color = ~Manager,
-        text = ~team_name
+        text = ~Manager
     )
 ```
 
@@ -98,7 +98,7 @@ corrplot::corrplot.mixed(cor_numeric, upper = "ellipse", lower = "number", tl.po
 ```{r build_regression, echo = FALSE, warning = FALSE, message = FALSE}
 skim_table_numeric <- skimr::skim(numeric_table)
 
-reactable::reactable(skim_table)
+reactable::reactable(skim_table_numeric, pagination = F)
 ```
 
 ```{r dummy_col_creation, echo = FALSE, warning = FALSE, message = FALSE}
@@ -130,10 +130,15 @@ training_set <- totals_table_w_dummies[train_row_numbers, ]
 
 test_set <- totals_table_w_dummies[-train_row_numbers, ]
 
-print(str(training_set))
-print(str(test_set))
+skim_table_training <- skimr::skim(training_set)
+
+reactable::reactable(skim_table_training, pagination = F)
+
+skim_table_test <- skimr::skim(test_set)
+
+reactable::reactable(skim_table_test)
 ```
 
 ```{r build_model, echo = FALSE, warning = FALSE, message = FALSE}
-
+caret::nearZeroVar(totals_table_w_dummies)
 ```

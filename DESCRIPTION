@@ -21,6 +21,7 @@ Imports:
     plotly,
     readr,
     skimr,
+    stats,
     stringr,
     tibble,
     tidyr,
