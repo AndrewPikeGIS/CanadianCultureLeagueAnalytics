@@ -6,6 +6,7 @@ output: html_document
 ---
 ```{r load_package, echo = FALSE, warning = FALSE, message = FALSE}
 pkgload::load_all()
+library(caret)
 ```
 
 
@@ -28,7 +29,9 @@ full_table <- join_standings_table(team_log_w_manager, standings_table) %>%
 
 totals_table <- full_table %>%
     dplyr::filter(
-        Name == "Total"
+        Name == "Total",
+        Manager != "Collin",
+        Manager != "Noel"
     ) %>%
     dplyr::mutate(
         Manager = as.factor(Manager),
@@ -80,6 +83,7 @@ totals_table %>%
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 numeric_table <- totals_table %>%
+    dplyr::ungroup() %>%
     dplyr::select_if(is.numeric) %>%
     dplyr::select(
         -c(
@@ -91,10 +95,22 @@ numeric_table <- totals_table %>%
     )
 
 cor_numeric <- cor(numeric_table)
+```
 
+
+## Build corrplot
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
 corrplot::corrplot.mixed(cor_numeric, upper = "ellipse", lower = "number", tl.pos = "lt")
 ```
 
+## Drop high correlation features
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+
+```
+
+## Numeric Skim Table
 ```{r build_regression, echo = FALSE, warning = FALSE, message = FALSE}
 skim_table_numeric <- skimr::skim(numeric_table)
 
@@ -117,6 +133,15 @@ totals_table_w_dummies <- dplyr::bind_cols(
 )
 ```
 
+
+## Test for Near Zero Variance
+
+```{r build_model, echo = FALSE, warning = FALSE, message = FALSE}
+caret::nearZeroVar(totals_table_w_dummies, saveMetrics = T)
+```
+
+## Split into test/train split
+
 ```{r build_test_train, echo = FALSE, warning = FALSE, message = FALSE}
 set.seed(2)
 
@@ -136,9 +161,11 @@ reactable::reactable(skim_table_training, pagination = F)
 
 skim_table_test <- skimr::skim(test_set)
 
-reactable::reactable(skim_table_test)
+reactable::reactable(skim_table_test, pagination = F)
 ```
 
-```{r build_model, echo = FALSE, warning = FALSE, message = FALSE}
-caret::nearZeroVar(totals_table_w_dummies)
+## Train Model
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+
 ```
