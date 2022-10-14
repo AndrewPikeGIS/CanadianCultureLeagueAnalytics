@@ -188,25 +188,26 @@ join_standings_table <- function(table_in, standings_table) {
     return(full_table)
 }
 
-normalize_gp <- function(table_in) {
+normalize_cols <- function(table_in) {
     table_out <- table_in %>%
         dplyr::group_by(
             year
         ) %>%
         dplyr::mutate(
-            GP_norm = GP / max(GP)
+            GP_norm = GP / max(GP),
+            moves_norm = Moves / max(Moves),
+            goals_norm = G / max(G),
+            assist_norm = A / max(A),
+            ppp_norm = PPP / max(PPP),
+            hit_norm = HIT / max(HIT),
+            blk_norm = BLK / max(BLK),
+            pim_norm = PIM / max(PIM),
+            plus_minus_norm = (
+                plus_minus + abs(min(plus_minus))
+            ) / (
+                max(plus_minus) + abs(min(plus_minus))
+            )
         )
 
-    return(table_out)
-}
-
-normalize_moves <- function(table_in) {
-    table_out <- table_in %>%
-        dplyr::group_by(
-            year
-        ) %>%
-        dplyr::mutate(
-            moves_norm = Moves / max(Moves)
-        )
     return(table_out)
 }

@@ -25,7 +25,7 @@ standings_table <- read_standings_table()
 team_log_w_manager <- join_manager_table(team_logs, manager_table)
 # need to normalize moves
 full_table <- join_standings_table(team_log_w_manager, standings_table) %>%
-    normalize_gp()
+    normalize_cols()
 
 totals_table <- full_table %>%
     dplyr::filter(
@@ -86,29 +86,6 @@ totals_table %>%
     )
 ```
 
-```{r, echo = FALSE, warning = FALSE, message = FALSE}
-numeric_table <- totals_table %>%
-    dplyr::ungroup() %>%
-    dplyr::select_if(is.numeric) %>%
-    dplyr::select(
-        !year
-    )
-
-cor_numeric <- cor(numeric_table)
-```
-
-
-## Build corrplot
-
-```{r, echo = FALSE, warning = FALSE, message = FALSE}
-corrplot::corrplot.mixed(cor_numeric, upper = "ellipse", lower = "number", tl.pos = "lt")
-```
-
-## Drop high correlation features
-
-```{r, echo = FALSE, warning = FALSE, message = FALSE}
-
-```
 
 ## Numeric Skim Table
 ```{r build_regression, echo = FALSE, warning = FALSE, message = FALSE}
@@ -131,17 +108,52 @@ totals_table_w_dummies <- dplyr::bind_cols(
     final_rank = totals_table$final_rank,
     totals_table_w_dummies
 )
+```
 
+## Corplot 
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
 cor_totals <- cor(totals_table_w_dummies)
 
-corrplot::corrplot.mixed(cor_totals, upper = "ellipse", lower = "number", tl.pos = "lt")
+corrplot::corrplot.mixed(
+    cor_totals,
+    upper = "ellipse",
+    lower = "number",
+    tl.pos = "lt"
+)
+```
+
+## Drop high correlation features
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+totals_table_w_dummies <- totals_table_w_dummies %>%
+    dplyr::select(
+        -c(
+            "GP",
+            "year",
+            "G",
+            "A",
+            "PPP",
+            "plus_minus",
+            "HIT",
+            "BLK",
+            "PIM",
+            "Moves",
+            "ppp_norm"
+        )
+    )
 ```
 
 
 ## Test for Near Zero Variance
 
 ```{r build_model, echo = FALSE, warning = FALSE, message = FALSE}
-caret::nearZeroVar(totals_table_w_dummies, saveMetrics = T)
+print(
+    caret::nearZeroVar(
+        totals_table_w_dummies,
+        saveMetrics = T
+    )
+)
 ```
 
 ## Split into test/train split
@@ -161,6 +173,10 @@ test_set <- totals_table_w_dummies[-train_row_numbers, ]
 
 skim_table_training <- skimr::skim(training_set)
 
+nrow(training_set)
+
+nrow(test_set)
+
 reactable::reactable(skim_table_training, pagination = F)
 
 skim_table_test <- skimr::skim(test_set)
@@ -173,9 +189,11 @@ reactable::reactable(skim_table_test, pagination = F)
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 set.seed(2)
 
-gbm_fit <- caret::train(
+model_fit <- caret::train(
     final_rank ~ .,
     data = training_set,
-    method = "gbm"
+    method = "glm"
 )
+
+model_fit
 ```
