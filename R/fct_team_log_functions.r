@@ -184,6 +184,8 @@ join_standings_table <- function(table_in, standings_table) {
             "year" = "year"
         )
     )
+
+    return(full_table)
 }
 
 normalize_gp <- function(table_in) {
@@ -194,4 +196,17 @@ normalize_gp <- function(table_in) {
         dplyr::mutate(
             GP_norm = GP / max(GP)
         )
+
+    return(table_out)
+}
+
+normalize_moves <- function(table_in) {
+    table_out <- table_in %>%
+        dplyr::group_by(
+            year
+        ) %>%
+        dplyr::mutate(
+            moves_norm = Moves / max(Moves)
+        )
+    return(table_out)
 }
