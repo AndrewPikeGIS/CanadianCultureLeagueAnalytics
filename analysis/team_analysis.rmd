@@ -87,13 +87,6 @@ totals_table %>%
 ```
 
 
-## Numeric Skim Table
-```{r build_regression, echo = FALSE, warning = FALSE, message = FALSE}
-skim_table_numeric <- skimr::skim(numeric_table)
-
-reactable::reactable(skim_table_numeric, pagination = F)
-```
-
 ```{r dummy_col_creation, echo = FALSE, warning = FALSE, message = FALSE}
 dummy_totals <- caret::dummyVars(final_rank ~ ., data = totals_table)
 
@@ -139,7 +132,22 @@ totals_table_w_dummies <- totals_table_w_dummies %>%
             "BLK",
             "PIM",
             "Moves",
-            "ppp_norm"
+            "ppp_norm", # start of recursive feature delete
+            "Manager.Kal",
+            "goals_norm",
+            "blk_norm",
+            "GP_norm",
+            "Manager.Jeremy",
+            "hit_norm",
+            "Manager.Ray",
+            "Manager.Derek",
+            "Manager.Adam",
+            "Manager.Andrew",
+            "moves_norm",
+            "Manager.Evan",
+            "Manager.Mark",
+            "Manager.Jordan",
+            "Manager.Patrick"
         )
     )
 ```
@@ -170,12 +178,16 @@ train_row_numbers <- caret::createDataPartition(
 training_set <- totals_table_w_dummies[train_row_numbers, ]
 
 test_set <- totals_table_w_dummies[-train_row_numbers, ]
+```
 
-skim_table_training <- skimr::skim(training_set)
+## build skim tables 
 
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
 nrow(training_set)
 
 nrow(test_set)
+
+skim_table_training <- skimr::skim(training_set)
 
 reactable::reactable(skim_table_training, pagination = F)
 
@@ -184,7 +196,7 @@ skim_table_test <- skimr::skim(test_set)
 reactable::reactable(skim_table_test, pagination = F)
 ```
 
-## Train Model
+## Train Model and recursively remove value of least significance.
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 set.seed(2)
@@ -194,6 +206,18 @@ model_fit <- caret::train(
     data = training_set,
     method = "glm"
 )
+print(
+    summary(model_fit)
+)
 
-model_fit
+model_predict <- predict(model_fit, newdata = test_set)
+
+test_set$final_rank
+
+print(
+    paste0(
+        "RMSE: ",
+        RMSE(model_predict, test_set$final_rank)
+    )
+)
 ```
